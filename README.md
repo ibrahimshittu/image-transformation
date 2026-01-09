@@ -100,15 +100,111 @@ src/
     └── prisma.ts           # Database client
 ```
 
-## API Routes
+## API Reference
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/images` | Upload image |
-| GET | `/api/images` | List images (paginated) |
-| GET | `/api/images/[id]` | Get single image |
-| DELETE | `/api/images/[id]` | Delete image |
-| POST | `/api/transformations` | Remove background |
+### Images
+
+#### Upload Image
+```
+POST /api/images
+```
+Upload a new image for processing.
+
+**Request:** `multipart/form-data` with `file` field
+
+**Response:**
+```json
+{
+  "id": "uuid",
+  "originalUrl": "https://...",
+  "originalFilename": "image.png",
+  "width": 1920,
+  "height": 1080,
+  "status": "PENDING",
+  "createdAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+#### List Images
+```
+GET /api/images?page=1&limit=20&status=COMPLETED
+```
+Get paginated list of user's images.
+
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 20)
+- `status` (optional): Filter by status (PENDING, PROCESSING, COMPLETED, FAILED)
+
+**Response:**
+```json
+{
+  "images": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 50,
+    "totalPages": 3
+  }
+}
+```
+
+#### Get Single Image
+```
+GET /api/images/[id]
+```
+Get a specific image with its transformations.
+
+**Response:**
+```json
+{
+  "id": "uuid",
+  "originalUrl": "https://...",
+  "originalFilename": "image.png",
+  "status": "COMPLETED",
+  "transformations": [...]
+}
+```
+
+#### Delete Image
+```
+DELETE /api/images/[id]
+```
+Delete an image and all associated files.
+
+**Response:**
+```json
+{
+  "success": true
+}
+```
+
+### Transformations
+
+#### Remove Background
+```
+POST /api/transformations
+```
+Process an image to remove its background.
+
+**Request:**
+```json
+{
+  "imageId": "uuid"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "uuid",
+  "imageId": "uuid",
+  "status": "COMPLETED",
+  "outputUrl": "https://...",
+  "processingTime": 2500,
+  "creditsCharged": 1
+}
+```
 
 ## Database Schema
 
