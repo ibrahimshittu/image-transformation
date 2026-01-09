@@ -97,7 +97,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
     setLoading(false)
     onClose()
-    router.push('/dashboard')
+    router.push('/')
     router.refresh()
   }
 
@@ -115,7 +115,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     const supabase = createClient()
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
     })
 
     setLoading(false)

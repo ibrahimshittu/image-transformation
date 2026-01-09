@@ -61,7 +61,7 @@ export default function ResetPasswordPage() {
       description: "Your password has been successfully reset.",
     })
 
-    router.push('/dashboard')
+    router.push('/')
   }
 
   return (
