@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { X, Check } from 'lucide-react'
+import { X, Check, Eye, EyeOff } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 interface AuthModalProps {
@@ -20,6 +20,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -73,6 +74,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       // Check if email confirmation is required
       if (data?.user?.identities?.length === 0) {
         toast({
+          variant: "destructive",
           title: "Account exists",
           description: "An account with this email already exists. Please sign in instead.",
         })
@@ -184,16 +186,29 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <label htmlFor="password" className="text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  autoComplete={isLogin ? 'current-password' : 'new-password'}
-                  className="h-10 border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-gray-400"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    autoComplete={isLogin ? 'current-password' : 'new-password'}
+                    className="h-10 border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-gray-400 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <Button

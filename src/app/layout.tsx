@@ -6,8 +6,12 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Uplane - Image Transformation Service",
-  description: "Upload, transform, and manage images with background removal and flip operations",
+  title: "Uplane - AI Background Remover",
+  description: "Remove backgrounds from images instantly using AI. Free, fast, and high quality.",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/apple-icon.svg",
+  },
 }
 
 export default function RootLayout({
