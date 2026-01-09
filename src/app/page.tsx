@@ -278,7 +278,7 @@ export default function Home() {
 
           {/* Right Card - Upload Area or Transformation Viewer */}
           <div className="w-full">
-            {!currentImage ? (
+            {!currentImage && !isUploading ? (
               <div
                 {...getRootProps()}
                 className="bg-white rounded-3xl p-3 shadow-lg shadow-gray-100/50 border border-gray-100 aspect-square sm:aspect-[4/3] relative group overflow-hidden"
@@ -294,11 +294,6 @@ export default function Home() {
                     <div className="text-center space-y-4">
                       <Upload className="w-12 h-12 mx-auto text-gray-600 animate-bounce" />
                       <p className="text-gray-600 font-medium">Drop your image here</p>
-                    </div>
-                  ) : isUploading ? (
-                    <div className="text-center space-y-4">
-                      <div className="w-12 h-12 mx-auto border-4 border-black border-t-transparent rounded-full animate-spin" />
-                      <p className="text-gray-600 font-medium">Uploading...</p>
                     </div>
                   ) : (
                     <div className="text-center space-y-4">
@@ -322,10 +317,10 @@ export default function Home() {
               </div>
             ) : (
               <TransformationViewer
-                originalUrl={currentImage.originalUrl}
-                processedUrl={currentImage.transformations?.[0]?.outputUrl || null}
-                status={currentImage.status}
-                isProcessing={isUploading || currentImage.status === 'PROCESSING'}
+                originalUrl={currentImage?.originalUrl || ''}
+                processedUrl={currentImage?.transformations?.[0]?.outputUrl || null}
+                status={currentImage?.status || 'PROCESSING'}
+                isProcessing={isUploading || currentImage?.status === 'PROCESSING'}
                 onDownload={handleDownload}
                 onReset={handleReset}
               />

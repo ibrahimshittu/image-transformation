@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ImageCard } from '@/components/gallery/image-card'
-import { Plus, Images, Loader2, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Plus, Images, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { createClient } from '@/lib/supabase/client'
 
@@ -159,9 +159,17 @@ export default function GalleryPage() {
         </div>
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-24">
-            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-            <p className="mt-4 text-gray-500">Loading your images...</p>
+          /* Skeleton Loading Grid */
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm animate-pulse">
+                <div className="aspect-square bg-gray-200" />
+                <div className="p-3 border-t border-gray-100">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : images.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
