@@ -17,7 +17,6 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
 
-  // Handle email confirmation (token_hash flow)
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({
       token_hash,
@@ -25,14 +24,15 @@ export async function GET(request: Request) {
     })
 
     if (!error) {
+      if (type === 'recovery') {
+        return NextResponse.redirect(`${origin}/auth/reset-password`)
+      }
       return NextResponse.redirect(`${origin}${next}`)
     }
 
-    // On error, redirect to home with auth modal
-    return NextResponse.redirect(`${origin}/?auth=required&error=verification_failed`)
+    return NextResponse.redirect(`${origin}/?error=verification_failed`)
   }
 
-  // Handle code exchange flow (OAuth)
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
@@ -41,10 +41,8 @@ export async function GET(request: Request) {
       const isLocalEnv = process.env.NODE_ENV === 'development'
 
       if (isLocalEnv) {
-        // In development, redirect to localhost
         return NextResponse.redirect(`${origin}${next}`)
       } else if (forwardedHost) {
-        // In production behind a proxy
         return NextResponse.redirect(`https://${forwardedHost}${next}`)
       } else {
         return NextResponse.redirect(`${origin}${next}`)
@@ -52,6 +50,5 @@ export async function GET(request: Request) {
     }
   }
 
-  // Return to home with auth modal if something went wrong
   return NextResponse.redirect(`${origin}/?auth=required&error=auth_callback_error`)
 }

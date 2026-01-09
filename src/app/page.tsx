@@ -10,11 +10,13 @@ import { HowItWorks } from '@/components/home/how-it-works'
 import { FeatureSection } from '@/components/home/feature-section'
 import { useAuth } from '@/hooks/use-auth'
 import { useUpload } from '@/hooks/use-upload'
+import { useToast } from '@/hooks/use-toast'
 
 function HomeContent() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const { user, signOut } = useAuth()
   const { currentImage, isUploading, handleUpload, handleReset } = useUpload()
+  const { toast } = useToast()
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -22,7 +24,21 @@ function HomeContent() {
     if (searchParams.get('auth') === 'required') {
       setIsAuthModalOpen(true)
     }
-  }, [searchParams])
+
+    const error = searchParams.get('error')
+    if (error) {
+      const errorMessages: Record<string, string> = {
+        verification_failed: 'Email verification failed. The link may have expired.',
+        auth_callback_error: 'Authentication failed. Please try again.',
+      }
+      toast({
+        variant: 'destructive',
+        title: 'Authentication error',
+        description: errorMessages[error] || 'An error occurred during authentication.',
+      })
+      router.replace('/', { scroll: false })
+    }
+  }, [searchParams, toast, router])
 
   const handleCloseModal = () => {
     setIsAuthModalOpen(false)
