@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 interface TransformationViewerProps {
   originalUrl: string
   processedUrl: string | null
-  status: string
   isProcessing: boolean
   onDownload: () => void
   onReset?: () => void

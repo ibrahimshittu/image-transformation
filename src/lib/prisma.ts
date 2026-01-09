@@ -37,9 +37,4 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Export Prisma enums for use in the application
-export {
-  ImageStatus,
-  TransformationType,
-  TransformationStatus,
-  BatchJobStatus,
-} from '@prisma/client'
+export { ImageStatus, TransformationType, TransformationStatus } from '@prisma/client'

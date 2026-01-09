@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ImageCard } from '@/components/gallery/image-card'
+import { Navbar } from '@/components/layout/navbar'
 import { Plus, Images, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/hooks/use-auth'
 
 interface ImageData {
   id: string
@@ -33,6 +34,7 @@ export default function GalleryPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const { toast } = useToast()
+  const { user, signOut } = useAuth()
 
   const fetchImages = async (page: number = 1) => {
     setIsLoading(true)
@@ -71,10 +73,8 @@ export default function GalleryPage() {
         throw new Error('Failed to delete image')
       }
 
-      // Remove from local state
       setImages((prev) => prev.filter((img) => img.id !== id))
 
-      // Update pagination count
       if (pagination) {
         setPagination({ ...pagination, total: pagination.total - 1 })
       }
@@ -84,7 +84,6 @@ export default function GalleryPage() {
         description: 'The image has been permanently removed.',
       })
 
-      // Refetch if we deleted the last item on the page
       if (images.length === 1 && currentPage > 1) {
         fetchImages(currentPage - 1)
       }
@@ -100,50 +99,18 @@ export default function GalleryPage() {
   }
 
   const handleSignOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    await signOut()
     window.location.href = '/'
   }
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navbar - same style as main page */}
-      <nav className="fixed w-full bg-white/90 backdrop-blur-xl z-50 transition-all duration-300 border-b border-gray-100">
-        <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="text-2xl font-bold tracking-tight text-black">
-              Uplane
-              <span className="text-sm pl-1 font-light text-gray-400">Background Remover</span>
-            </Link>
-          </div>
+      <Navbar user={user} onSignOut={handleSignOut} />
 
-          <div className="flex items-center gap-4">
-            <Link href="/gallery">
-              <Button
-                variant="ghost"
-                className="text-[15px] font-medium text-black hover:text-black hover:bg-transparent px-4 gap-2"
-              >
-                <Images className="w-4 h-4" />
-                Gallery
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              className="text-[15px] font-medium text-gray-600 hover:text-black hover:bg-transparent px-4"
-              onClick={handleSignOut}
-            >
-              Sign out
-            </Button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="max-w-[1400px] mx-auto px-6 pt-28 pb-12">
-        {/* Page Header */}
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Your Images</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Your Images</h1>
             {!isLoading && pagination && (
               <p className="text-sm text-gray-500 mt-1">
                 {pagination.total} {pagination.total === 1 ? 'image' : 'images'}
@@ -151,18 +118,21 @@ export default function GalleryPage() {
             )}
           </div>
           <Link href="/">
-            <Button className="rounded-lg bg-black text-white hover:bg-gray-800 px-6 h-10 text-[15px] font-medium gap-2">
+            <Button className="rounded-lg bg-black text-white hover:bg-gray-800 px-4 sm:px-6 h-9 sm:h-10 text-sm sm:text-[15px] font-medium gap-2">
               <Plus className="w-4 h-4" />
-              New Upload
+              <span className="hidden sm:inline">New Upload</span>
+              <span className="sm:hidden">New</span>
             </Button>
           </Link>
         </div>
 
         {isLoading ? (
-          /* Skeleton Loading Grid */
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm animate-pulse">
+              <div
+                key={i}
+                className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm animate-pulse"
+              >
                 <div className="aspect-square bg-gray-200" />
                 <div className="p-3 border-t border-gray-100">
                   <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
@@ -180,16 +150,9 @@ export default function GalleryPage() {
             <p className="text-gray-500 mb-6 max-w-sm">
               Upload your first image to get started with background removal.
             </p>
-            <Link href="/">
-              <Button className="gap-2 bg-black hover:bg-gray-800">
-                <Plus className="w-4 h-4" />
-                Upload Image
-              </Button>
-            </Link>
           </div>
         ) : (
           <>
-            {/* Image Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {images.map((image) => (
                 <ImageCard
@@ -205,7 +168,6 @@ export default function GalleryPage() {
               ))}
             </div>
 
-            {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
               <div className="flex items-center justify-center gap-4 mt-8">
                 <Button
@@ -216,7 +178,7 @@ export default function GalleryPage() {
                   className="gap-1"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Previous
+                  <span className="hidden sm:inline">Previous</span>
                 </Button>
                 <span className="text-sm text-gray-600">
                   Page {currentPage} of {pagination.totalPages}
@@ -228,7 +190,7 @@ export default function GalleryPage() {
                   disabled={currentPage === pagination.totalPages}
                   className="gap-1"
                 >
-                  Next
+                  <span className="hidden sm:inline">Next</span>
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>

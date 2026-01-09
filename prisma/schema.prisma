@@ -20,8 +20,7 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relationships
-  images    Image[]
-  apiKeys   ApiKey[]
+  images Image[]
 
   @@map("users")
 }
@@ -94,26 +93,4 @@ model Transformation {
   @@index([imageId])
   @@index([status])
   @@map("transformations")
-}
-
-// ============================================
-// ApiKey Model - Programmatic API access
-// ============================================
-model ApiKey {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  name      String
-  keyHash   String   @unique @map("key_hash") // Hashed API key for security
-  keyPrefix String   @map("key_prefix") // First 8 chars for display (e.g., "uplane_sk_abc123...")
-  lastUsed  DateTime? @map("last_used")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relationships
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Indexes
-  @@index([userId])
-  @@index([keyHash])
-  @@map("api_keys")
 }

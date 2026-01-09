@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Trash2, Download, Loader2, X, Expand } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { downloadImage } from '@/lib/download'
 
 interface ImageCardProps {
   id: string
@@ -39,20 +40,11 @@ export function ImageCard({
 
   const handleDownload = async () => {
     const url = processedUrl || originalUrl
+    const filename = processedUrl
+      ? `processed_${originalFilename.replace(/\.[^/.]+$/, '')}.png`
+      : originalFilename
     try {
-      const response = await fetch(url)
-      const blob = await response.blob()
-      const blobUrl = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = blobUrl
-      const filename = processedUrl
-        ? `processed_${originalFilename.replace(/\.[^/.]+$/, '')}.png`
-        : originalFilename
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(blobUrl)
+      await downloadImage(url, filename)
     } catch (error) {
       console.error('Download failed:', error)
     }

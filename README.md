@@ -1,45 +1,32 @@
-# Uplane - Image Transformation Service
+# Uplane - AI Background Remover
 
-A full-stack image transformation service built with Next.js 14, TypeScript, and modern web technologies. Upload images, remove backgrounds, flip images, and manage your gallery with ease.
+Remove backgrounds from images instantly using AI. Free, fast, and with HD quality downloads.
 
 ## Features
 
-- **Image Upload**: Drag-and-drop interface for easy image uploads
-- **Background Removal**: Powered by remove.bg API for professional results
-- **Image Transformations**: Flip images horizontally and vertically
-- **Gallery Management**: View, filter, and organize all your images
-- **Batch Processing**: Process multiple images at once
-- **API Access**: Generate API keys for programmatic access
-- **Real-time Preview**: Before/after comparison with interactive slider
-- **Optimistic UI**: Instant feedback with smart loading states
+- Instant AI-powered background removal
+- HD quality downloads with no watermark
+- Gallery to view and manage your images
+- Hold to compare original vs processed
+- Mobile-friendly responsive design
 
 ## Tech Stack
 
-### Core
-- **Next.js 14+** (App Router)
-- **TypeScript** (strict mode)
-- **Clerk** (authentication)
-- **PostgreSQL** with Prisma ORM
-- **Vercel Blob** (file storage)
-- **Sharp** (image processing)
-
-### UI & State
-- **shadcn/ui** + Radix UI
+- **Next.js 15** (App Router)
+- **TypeScript**
+- **Supabase** (Auth + Storage)
+- **Prisma** (Database ORM)
+- **remove.bg API** (Background removal)
 - **Tailwind CSS**
-- **TanStack Query** (React Query v5)
-- **react-dropzone**
-- **react-compare-slider**
-- **Zod** (validation)
+- **shadcn/ui** (UI components)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- PostgreSQL database
-- Clerk account (for authentication)
+- Node.js 18+
+- Supabase account
 - remove.bg API key
-- Vercel account (for blob storage)
 
 ### Installation
 
@@ -59,170 +46,95 @@ npm install
 cp .env.example .env.local
 ```
 
-Then fill in your environment variables in `.env.local`:
-- `DATABASE_URL`: Your PostgreSQL connection string
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` & `CLERK_SECRET_KEY`: From [Clerk Dashboard](https://dashboard.clerk.com)
-- `CLERK_WEBHOOK_SECRET`: Create webhook in Clerk for user sync
-- `BLOB_READ_WRITE_TOKEN`: From [Vercel Blob](https://vercel.com/docs/storage/vercel-blob)
-- `REMOVE_BG_API_KEY`: From [remove.bg](https://www.remove.bg/api)
-
-4. Initialize database:
-```bash
-npx prisma generate
-npx prisma migrate dev --name init
+4. Fill in your `.env.local`:
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+REMOVE_BG_API_KEY=your_removebg_key
+DATABASE_URL=your_postgres_url
 ```
 
-5. Run the development server:
+5. Initialize database:
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+6. Run the development server:
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the application.
 
-### Clerk Webhook Setup
-
-1. Go to [Clerk Dashboard](https://dashboard.clerk.com) → Webhooks
-2. Add endpoint: `http://localhost:3000/api/webhooks/clerk` (or your production URL)
-3. Subscribe to events: `user.created`, `user.updated`, `user.deleted`
-4. Copy the signing secret to `CLERK_WEBHOOK_SECRET`
-
 ## Project Structure
 
 ```
-/Users/ibrahimshittu/Projects/uplane/
-├── app/
-│   ├── (auth)/           # Authentication pages
-│   ├── (dashboard)/      # Protected routes (upload, gallery, batch, settings)
-│   ├── api/              # API routes
-│   ├── layout.tsx
-│   └── page.tsx
+src/
+├── app/                    # Pages and API routes
+│   ├── (dashboard)/        # Protected routes
+│   │   └── gallery/        # User's image gallery
+│   ├── api/                # API endpoints
+│   │   ├── images/         # Image CRUD
+│   │   └── transformations/# Background removal
+│   └── page.tsx            # Landing page
 ├── components/
-│   ├── ui/               # shadcn/ui components
-│   ├── upload/           # Upload components
-│   ├── gallery/          # Gallery components
-│   └── transformation/   # Transformation components
-├── lib/
-│   ├── prisma.ts         # Prisma client
-│   ├── storage/          # Blob storage & image processing
-│   ├── integrations/     # External APIs (remove.bg)
-│   └── auth/             # API key validation
-├── hooks/                # Custom React hooks
-├── types/                # TypeScript types
-├── prisma/
-│   └── schema.prisma     # Database schema
-└── public/
+│   ├── auth/               # Authentication modal
+│   ├── gallery/            # Gallery components
+│   ├── home/               # Landing page sections
+│   ├── layout/             # Shared layout (navbar, footer)
+│   ├── ui/                 # Base UI components
+│   └── upload/             # Upload/transformation viewer
+├── hooks/                  # Custom React hooks
+│   ├── use-auth.ts         # Auth state management
+│   └── use-toast.ts        # Toast notifications
+└── lib/                    # Utilities and services
+    ├── download.ts         # File download utility
+    ├── integrations/       # External APIs
+    ├── storage/            # File storage
+    ├── supabase/           # Supabase clients
+    └── prisma.ts           # Database client
 ```
 
 ## API Routes
 
-### Images
-- `POST /api/images` - Upload image
-- `GET /api/images` - List images with pagination and filtering
-- `GET /api/images/[id]` - Get specific image
-- `DELETE /api/images/[id]` - Delete image
-
-### Transformations
-- `POST /api/transformations` - Create transformation
-- `GET /api/transformations/[id]` - Get transformation status
-- `POST /api/transformations/batch` - Batch process images
-- `GET /api/transformations/batch/[id]` - Get batch job progress
-
-### Authentication
-- `POST /api/webhooks/clerk` - Clerk webhook for user sync
-- `POST /api/api-keys` - Generate API key
-- `GET /api/api-keys` - List user's API keys
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/images` | Upload image |
+| GET | `/api/images` | List images (paginated) |
+| GET | `/api/images/[id]` | Get single image |
+| DELETE | `/api/images/[id]` | Delete image |
+| POST | `/api/transformations` | Remove background |
 
 ## Database Schema
 
-- **User**: Synced from Clerk
+- **User**: Synced from Supabase Auth
 - **Image**: Uploaded images with metadata
-- **Transformation**: Processing operations (remove background, flip)
-- **BatchJob**: Batch processing tracking
-- **ApiKey**: Programmatic API access
+- **Transformation**: Background removal results
 
 ## Development Commands
 
 ```bash
-# Start development server
-npm run dev
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run linter
 
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Run linter
-npm run lint
-
-# Prisma commands
-npx prisma studio          # Open Prisma Studio (database GUI)
-npx prisma migrate dev     # Create and apply migrations
-npx prisma generate        # Generate Prisma Client
-npx prisma db push         # Push schema changes without migration
+npx prisma studio    # Open database GUI
+npx prisma db push   # Push schema changes
+npx prisma generate  # Generate Prisma client
 ```
 
 ## Deployment
 
-### Vercel (Recommended)
+### Vercel
 
-1. Push your code to GitHub
+1. Push code to GitHub
 2. Import project in [Vercel](https://vercel.com)
 3. Set environment variables
-4. Deploy!
-
-### Environment Variables for Production
-
-Make sure to set all environment variables from `.env.example` in your hosting platform.
-
-For Clerk webhook, update the endpoint URL to your production domain:
-```
-https://your-domain.com/api/webhooks/clerk
-```
-
-## Performance Considerations
-
-- Images are automatically optimized with Next.js Image component
-- Thumbnails generated for gallery view (200x200px)
-- Database queries use proper indexing for fast lookups
-- TanStack Query provides automatic caching and revalidation
-
-## Security Features
-
-- File type validation (magic bytes)
-- File size limits (10MB max)
-- API key authentication for programmatic access
-- Clerk middleware for route protection
-- Webhook signature verification
-
-## Cost Optimization
-
-- remove.bg API usage tracked per user
-- Image transformations cached (avoid reprocessing)
-- Automatic cleanup policies for old images
-
-## Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+4. Deploy
 
 ## License
 
-MIT License - see LICENSE file for details
-
-## Support
-
-For issues and questions, please open an issue on GitHub.
-
-## Acknowledgments
-
-- [Next.js](https://nextjs.org)
-- [Clerk](https://clerk.com)
-- [remove.bg](https://www.remove.bg)
-- [shadcn/ui](https://ui.shadcn.com)
-- [Vercel](https://vercel.com)
+MIT
