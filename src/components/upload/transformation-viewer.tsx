@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ExternalLink, Eye, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -18,8 +18,24 @@ export function TransformationViewer({
   onReset,
 }: TransformationViewerProps) {
   const [showOriginal, setShowOriginal] = useState(false)
+  const [processedImageLoaded, setProcessedImageLoaded] = useState(false)
 
   const isCompleted = !!processedUrl
+
+  // Reset loaded state and preload original when processedUrl changes
+  useEffect(() => {
+    if (processedUrl) {
+      setProcessedImageLoaded(false)
+    }
+  }, [processedUrl])
+
+  // Preload original image so it's ready for instant switching
+  useEffect(() => {
+    if (originalUrl) {
+      const img = new Image()
+      img.src = originalUrl
+    }
+  }, [originalUrl])
 
   const handleOpenImage = () => {
     if (processedUrl) {
@@ -56,19 +72,38 @@ export function TransformationViewer({
             </div>
           ) : (
             <>
+              {/* Original image - shown when holding button */}
               <img
-                src={showOriginal ? originalUrl : (processedUrl || originalUrl)}
-                alt="Preview"
-                className="w-full h-full object-contain transition-opacity"
+                src={originalUrl}
+                alt="Original"
+                className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-150 ${showOriginal ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
               />
-              {isCompleted && (
+              {/* Processed image - shown by default */}
+              <img
+                src={processedUrl || originalUrl}
+                alt="Processed"
+                className={`w-full h-full object-contain transition-opacity duration-150 ${!showOriginal && processedImageLoaded ? 'opacity-100' : showOriginal ? 'opacity-0' : 'opacity-0'}`}
+                onLoad={() => setProcessedImageLoaded(true)}
+              />
+              {!processedImageLoaded && isCompleted && !showOriginal && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                  <div className="animate-spin h-6 w-6 border-2 border-black border-t-transparent rounded-full" />
+                </div>
+              )}
+              {isCompleted && processedImageLoaded && (
                 <button
                   onMouseDown={() => setShowOriginal(true)}
                   onMouseUp={() => setShowOriginal(false)}
                   onMouseLeave={() => setShowOriginal(false)}
-                  onTouchStart={() => setShowOriginal(true)}
-                  onTouchEnd={() => setShowOriginal(false)}
-                  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-black transition-colors cursor-pointer backdrop-blur-sm"
+                  onTouchStart={(e) => {
+                    e.preventDefault()
+                    setShowOriginal(true)
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault()
+                    setShowOriginal(false)
+                  }}
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 hover:bg-black transition-colors cursor-pointer backdrop-blur-sm z-20 select-none"
                 >
                   <Eye className="h-4 w-4" />
                   Hold to see original

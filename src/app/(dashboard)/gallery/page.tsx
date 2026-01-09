@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { ImageCard } from '@/components/gallery/image-card'
 import { Navbar } from '@/components/layout/navbar'
@@ -37,7 +37,7 @@ export default function GalleryPage() {
   const { toast } = useToast()
   const { user, signOut } = useAuth()
 
-  const fetchImages = async (page: number = 1) => {
+  const fetchImages = useCallback(async (page: number = 1) => {
     setIsLoading(true)
     try {
       const response = await fetch(`/api/images?page=${page}&limit=12`)
@@ -58,11 +58,11 @@ export default function GalleryPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [toast])
 
   useEffect(() => {
     fetchImages(1)
-  }, [])
+  }, [fetchImages])
 
   const handleDelete = async (id: string) => {
     try {

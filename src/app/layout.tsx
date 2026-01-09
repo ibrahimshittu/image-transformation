@@ -6,7 +6,7 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Uplane - AI Background Remover",
+  title: "Uplane - Background Remover",
   description: "Remove backgrounds from images instantly using AI. Free, fast, and high quality.",
   icons: {
     icon: "/icon.svg",

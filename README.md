@@ -1,10 +1,10 @@
-# Uplane - AI Background Remover
+# Uplane - Background Remover
 
-Remove backgrounds from images instantly using AI. Free, fast, and high quality.
+Remove backgrounds from images instantly. Free, fast, and high quality.
 
 ## Features
 
-- Instant AI-powered background removal
+- Instant background removal
 - HD quality output with no watermark
 - Gallery to view and manage your images
 - Hold to compare original vs processed

@@ -74,7 +74,7 @@ export function HeroSection({
             Background Remover
           </h1>
           <p className="text-sm sm:text-base text-gray-600 leading-relaxed font-normal max-w-lg mx-auto lg:mx-0">
-            Instantly remove background from any image using Uplane&apos;s AI Background Remover. Free and easy to use!
+            Instantly remove background from any image using Uplane&apos;s Background Remover. Free and easy to use!
           </p>
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
             <div className="flex items-center gap-2">
@@ -100,9 +100,8 @@ export function HeroSection({
             >
               <input {...getInputProps()} />
               <div
-                className={`w-full h-full bg-gray-50/30 rounded-2xl border border-dashed flex flex-col items-center justify-center relative transition-all duration-300 ${
-                  isDragActive ? 'border-black bg-gray-100' : 'border-gray-300 hover:border-gray-400'
-                }`}
+                className={`w-full h-full bg-gray-50/30 rounded-2xl border border-dashed flex flex-col items-center justify-center relative transition-all duration-300 ${isDragActive ? 'border-black bg-gray-100' : 'border-gray-300 hover:border-gray-400'
+                  }`}
               >
                 {isDragActive ? (
                   <div className="text-center space-y-4">
