@@ -101,6 +101,40 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     router.refresh()
   }
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: "Email required",
+        description: "Please enter your email address first.",
+      })
+      return
+    }
+
+    setLoading(true)
+    const supabase = createClient()
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+    })
+
+    setLoading(false)
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Reset failed",
+        description: error.message,
+      })
+      return
+    }
+
+    toast({
+      title: "Check your email",
+      description: "We've sent you a password reset link.",
+    })
+  }
+
   const resetModal = () => {
     setEmail('')
     setPassword('')
@@ -183,9 +217,21 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                  Password
-                </label>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="password" className="text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  {isLogin && (
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      className="text-xs text-gray-500 hover:text-gray-700 hover:underline"
+                      disabled={loading}
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
                 <div className="relative">
                   <Input
                     id="password"
