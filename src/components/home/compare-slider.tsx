@@ -5,28 +5,23 @@ import { ChevronsLeftRight } from 'lucide-react'
 
 export function CompareSlider() {
   return (
-    <div className="w-full rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-white">
+    <div className="w-full rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-white relative">
       <ReactCompareSlider
         itemOne={
-          <div className="w-full h-full relative">
-            <ReactCompareSliderImage
-              src="/demo-clean-original.png"
-              srcSet="/demo-clean-original.png"
-              alt="Original Image"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-            <div className="absolute bottom-4 left-4 bg-black text-white text-xs font-medium px-3 py-1.5 rounded-md z-10 pointer-events-none">
-              Before
-            </div>
-          </div>
+          <ReactCompareSliderImage
+            src="/demo-clean-original.png"
+            srcSet="/demo-clean-original.png"
+            alt="Original Image"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
         }
         itemTwo={
           <div
-            className="w-full h-full relative"
+            className="w-full h-full"
             style={{
-              backgroundImage: 'url(/grid-pattern.svg)',
+              backgroundImage: 'url(/grid-pattern.svg?v=2)',
               backgroundRepeat: 'repeat',
-              backgroundColor: '#f9fafb'
+              backgroundColor: '#ffffff'
             }}
           >
             <ReactCompareSliderImage
@@ -35,9 +30,6 @@ export function CompareSlider() {
               alt="Background Removed"
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
-            <div className="absolute bottom-4 right-4 bg-black text-white text-xs font-medium px-3 py-1.5 rounded-md">
-              After
-            </div>
           </div>
         }
         handle={

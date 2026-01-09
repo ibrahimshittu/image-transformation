@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { X, Check } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -14,10 +15,10 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const router = useRouter()
+  const { toast } = useToast()
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   // Prevent body scroll when modal is open
@@ -35,7 +36,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
 
     const supabase = createClient()
 
@@ -46,19 +46,49 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       })
 
       if (error) {
-        setError(error.message)
+        toast({
+          variant: "destructive",
+          title: "Sign in failed",
+          description: error.message,
+        })
         setLoading(false)
         return
       }
     } else {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
       })
 
       if (error) {
-        setError(error.message)
+        toast({
+          variant: "destructive",
+          title: "Sign up failed",
+          description: error.message,
+        })
         setLoading(false)
+        return
+      }
+
+      // Check if email confirmation is required
+      if (data?.user?.identities?.length === 0) {
+        toast({
+          title: "Account exists",
+          description: "An account with this email already exists. Please sign in instead.",
+        })
+        setLoading(false)
+        setIsLogin(true)
+        return
+      }
+
+      if (data?.user && !data?.session) {
+        // Email confirmation required
+        toast({
+          title: "Check your email",
+          description: "We've sent you a confirmation link. Please check your email to complete sign up.",
+        })
+        setLoading(false)
+        onClose()
         return
       }
     }
@@ -72,7 +102,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const resetModal = () => {
     setEmail('')
     setPassword('')
-    setError(null)
   }
 
   const handleClose = () => {
@@ -135,12 +164,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </div>
 
             <form onSubmit={handleEmailAuth} className="space-y-4 pt-2">
-              {error && (
-                <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg">
-                  {error}
-                </div>
-              )}
-
               <div className="space-y-1.5">
                 <label htmlFor="email" className="text-sm font-medium text-gray-700">
                   Email address
@@ -187,10 +210,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 </span>
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsLogin(!isLogin)
-                    setError(null)
-                  }}
+                  onClick={() => setIsLogin(!isLogin)}
                   className="text-black font-medium hover:underline"
                 >
                   {isLogin ? 'Sign up' : 'Sign in'}

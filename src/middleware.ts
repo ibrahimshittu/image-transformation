@@ -11,7 +11,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 // Routes that require authentication
-const protectedRoutes = ['/dashboard', '/upload', '/gallery', '/batch', '/settings']
+const protectedRoutes = ['/gallery', '/upload', '/batch', '/settings']
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({

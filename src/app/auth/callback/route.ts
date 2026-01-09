@@ -12,9 +12,28 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/dashboard'
+  const token_hash = searchParams.get('token_hash')
+  const type = searchParams.get('type')
 
+  const supabase = await createClient()
+
+  // Handle email confirmation (token_hash flow)
+  if (token_hash && type) {
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash,
+      type: type as 'email' | 'signup' | 'recovery' | 'email_change',
+    })
+
+    if (!error) {
+      return NextResponse.redirect(`${origin}${next}`)
+    }
+
+    // On error, redirect to home with auth modal
+    return NextResponse.redirect(`${origin}/?auth=required&error=verification_failed`)
+  }
+
+  // Handle code exchange flow (OAuth)
   if (code) {
-    const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {
@@ -33,6 +52,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Return to login with error if something went wrong
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_error`)
+  // Return to home with auth modal if something went wrong
+  return NextResponse.redirect(`${origin}/?auth=required&error=auth_callback_error`)
 }

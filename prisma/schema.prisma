@@ -22,7 +22,6 @@ model User {
   // Relationships
   images    Image[]
   apiKeys   ApiKey[]
-  batchJobs BatchJob[]
 
   @@map("users")
 }
@@ -90,45 +89,11 @@ model Transformation {
 
   // Relationships
   image        Image     @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  batchJobId   String?   @map("batch_job_id")
-  batchJob     BatchJob? @relation(fields: [batchJobId], references: [id], onDelete: SetNull)
 
   // Indexes
   @@index([imageId])
   @@index([status])
-  @@index([batchJobId])
   @@map("transformations")
-}
-
-// ============================================
-// BatchJob Model - Batch operation tracking
-// ============================================
-enum BatchJobStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-  CANCELLED
-}
-
-model BatchJob {
-  id              String          @id @default(uuid())
-  userId          String          @map("user_id")
-  status          BatchJobStatus  @default(PENDING)
-  totalImages     Int             @map("total_images")
-  completedCount  Int             @default(0) @map("completed_count")
-  failedCount     Int             @default(0) @map("failed_count")
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
-
-  // Relationships
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transformations Transformation[]
-
-  // Indexes
-  @@index([userId, createdAt(sort: Desc)])
-  @@index([status])
-  @@map("batch_jobs")
 }
 
 // ============================================

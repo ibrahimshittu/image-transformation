@@ -15,7 +15,7 @@ export function HeroDemo() {
         />
         <div className="text-center mt-4 pb-2">
             <p className="text-sm text-gray-400">
-                Interactive Demo • Hold "Compare" to see the magic
+                Interactive Demo • Hold &quot;Compare&quot; to see the magic
             </p>
         </div>
       </div>
