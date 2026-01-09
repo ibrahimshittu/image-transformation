@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -151,9 +152,9 @@ export default function ResetPasswordPage() {
 
           <p className="text-xs text-gray-400 text-center mt-6">
             Remember your password?{' '}
-            <a href="/" className="text-gray-600 hover:underline">
+            <Link href="/" className="text-gray-600 hover:underline">
               Go back to sign in
-            </a>
+            </Link>
           </p>
         </div>
       </div>
