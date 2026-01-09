@@ -1,0 +1,154 @@
+// Image Transformation Service - Prisma Schema
+// Database: PostgreSQL (hosted on Supabase)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// User Model - Managed by Supabase Auth
+// ============================================
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  images    Image[]
+  apiKeys   ApiKey[]
+  batchJobs BatchJob[]
+
+  @@map("users")
+}
+
+// ============================================
+// Image Model - Original uploaded images
+// ============================================
+enum ImageStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Image {
+  id               String      @id @default(uuid())
+  userId           String      @map("user_id")
+  originalUrl      String      @map("original_url")
+  originalFilename String      @map("original_filename")
+  mimeType         String      @map("mime_type")
+  fileSize         Int         @map("file_size") // Size in bytes
+  width            Int?
+  height           Int?
+  status           ImageStatus @default(PENDING)
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  // Relationships
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transformations Transformation[]
+
+  // Indexes
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
+  @@map("images")
+}
+
+// ============================================
+// Transformation Model - Processing operations
+// ============================================
+enum TransformationType {
+  REMOVE_BACKGROUND
+  FLIP_HORIZONTAL
+  FLIP_VERTICAL
+}
+
+enum TransformationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Transformation {
+  id              String                @id @default(uuid())
+  imageId         String                @map("image_id")
+  type            TransformationType
+  status          TransformationStatus  @default(PENDING)
+  outputUrl       String?               @map("output_url")
+  errorMessage    String?               @map("error_message")
+  processingTime  Int?                  @map("processing_time") // Time in milliseconds
+  apiCost         Float?                @map("api_cost") // Cost in credits for remove.bg
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+
+  // Relationships
+  image        Image     @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  batchJobId   String?   @map("batch_job_id")
+  batchJob     BatchJob? @relation(fields: [batchJobId], references: [id], onDelete: SetNull)
+
+  // Indexes
+  @@index([imageId])
+  @@index([status])
+  @@index([batchJobId])
+  @@map("transformations")
+}
+
+// ============================================
+// BatchJob Model - Batch operation tracking
+// ============================================
+enum BatchJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model BatchJob {
+  id              String          @id @default(uuid())
+  userId          String          @map("user_id")
+  status          BatchJobStatus  @default(PENDING)
+  totalImages     Int             @map("total_images")
+  completedCount  Int             @default(0) @map("completed_count")
+  failedCount     Int             @default(0) @map("failed_count")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  // Relationships
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transformations Transformation[]
+
+  // Indexes
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
+  @@map("batch_jobs")
+}
+
+// ============================================
+// ApiKey Model - Programmatic API access
+// ============================================
+model ApiKey {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  keyHash   String   @unique @map("key_hash") // Hashed API key for security
+  keyPrefix String   @map("key_prefix") // First 8 chars for display (e.g., "uplane_sk_abc123...")
+  lastUsed  DateTime? @map("last_used")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([keyHash])
+  @@map("api_keys")
+}
