@@ -13,9 +13,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 // Routes that require authentication
 const protectedRoutes = ['/dashboard', '/upload', '/gallery', '/batch', '/settings']
 
-// Routes that are only accessible when NOT authenticated
-const authRoutes = ['/login', '/signup']
-
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -61,17 +58,9 @@ export async function middleware(request: NextRequest) {
 
   if (isProtectedRoute && !user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = '/'
+    url.searchParams.set('auth', 'required')
     url.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(url)
-  }
-
-  // Check if trying to access auth routes while already authenticated
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
-
-  if (isAuthRoute && user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 

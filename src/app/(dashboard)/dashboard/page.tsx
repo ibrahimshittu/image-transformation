@@ -1,61 +1,35 @@
 'use client'
 
-/**
- * Dashboard Page
- *
- * Main page for uploading images and viewing results.
- */
-
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Dropzone } from '@/components/upload/dropzone'
-import { ImageResult } from '@/components/upload/image-result'
-import { Loader2 } from 'lucide-react'
+import { TransformationViewer } from '@/components/upload/transformation-viewer'
+import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface Image {
   id: string
   originalUrl: string
   originalFilename: string
-  status: string
-  createdAt: string
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
   transformations: Array<{
     id: string
-    status: string
+    status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
     outputUrl: string | null
     processingTime: number | null
   }>
 }
 
 export default function DashboardPage() {
-  const [images, setImages] = useState<Image[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [currentImage, setCurrentImage] = useState<Image | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-
-  // Fetch images on mount
-  useEffect(() => {
-    fetchImages()
-  }, [])
-
-  const fetchImages = async () => {
-    try {
-      const response = await fetch('/api/images')
-      if (!response.ok) throw new Error('Failed to fetch images')
-      const data = await response.json()
-      setImages(data.images)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load images')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleUpload = async (file: File) => {
     setIsUploading(true)
     setError(null)
 
     try {
-      // Step 1: Upload the image
+      // Step 1: Upload
       const formData = new FormData()
       formData.append('file', file)
 
@@ -65,19 +39,20 @@ export default function DashboardPage() {
       })
 
       if (!uploadResponse.ok) {
-        const err = await uploadResponse.json()
-        throw new Error(err.error || 'Failed to upload image')
+        throw new Error('Failed to upload image')
       }
 
       const uploadedImage = await uploadResponse.json()
+      
+      // Update state immediately to show the viewer in "Processing" state (simulated until we trigger real processing)
+      const initialImageState: Image = {
+         ...uploadedImage,
+         status: 'PROCESSING', // Optimistic update
+         transformations: []
+      }
+      setCurrentImage(initialImageState)
 
-      // Add image to list with pending status
-      setImages((prev) => [
-        { ...uploadedImage, transformations: [] },
-        ...prev,
-      ])
-
-      // Step 2: Trigger transformation (remove bg + flip)
+      // Step 2: Trigger Transformation
       const transformResponse = await fetch('/api/transformations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,97 +60,91 @@ export default function DashboardPage() {
       })
 
       if (!transformResponse.ok) {
-        const err = await transformResponse.json()
-        throw new Error(err.error || 'Failed to process image')
+        throw new Error('Failed to start processing')
       }
 
-      // Refresh images to get updated status
-      await fetchImages()
+      const transformationResult = await transformResponse.json()
+      
+      // Update state with result
+      setCurrentImage({
+        ...initialImageState,
+        status: transformationResult.status,
+        transformations: [transformationResult]
+      })
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload')
-      // Refresh to get latest state
-      await fetchImages()
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setCurrentImage((prev) => prev ? { ...prev, status: 'FAILED' } : null)
     } finally {
       setIsUploading(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    setDeletingId(id)
+  const handleReset = () => {
+    setCurrentImage(null)
     setError(null)
+  }
 
-    try {
-      const response = await fetch(`/api/images/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        const err = await response.json()
-        throw new Error(err.error || 'Failed to delete image')
-      }
-
-      // Remove from list
-      setImages((prev) => prev.filter((img) => img.id !== id))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete')
-    } finally {
-      setDeletingId(null)
+  const handleDownload = () => {
+    const url = currentImage?.transformations?.[0]?.outputUrl
+    if (url) {
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `processed_${currentImage.originalFilename}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     }
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Image Transformer</h1>
-        <p className="mt-1 text-gray-600">
-          Upload an image to remove its background and flip it horizontally
-        </p>
-      </div>
-
-      {/* Error Alert */}
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          {error}
+    <div className="min-h-screen bg-gray-50/50">
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        
+        {/* Navigation / Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <span className="text-xl font-bold text-gray-900">Uplane Dashboard</span>
+          </div>
+          
+          {currentImage && (
+            <Button variant="outline" onClick={handleReset} className="gap-2">
+              <Plus className="w-4 h-4" />
+              New Upload
+            </Button>
+          )}
         </div>
-      )}
 
-      {/* Upload Section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Upload Image
-        </h2>
-        <Dropzone onUpload={handleUpload} isUploading={isUploading} />
-      </div>
+        {/* Main Content */}
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          {error && (
+             <div className="w-full max-w-md p-4 mb-6 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+               {error}
+             </div>
+          )}
 
-      {/* Results Section */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Your Images
-        </h2>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-          </div>
-        ) : images.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <p className="text-gray-500">
-              No images yet. Upload one to get started!
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {images.map((image) => (
-              <ImageResult
-                key={image.id}
-                image={image}
-                onDelete={handleDelete}
-                isDeleting={deletingId === image.id}
-              />
-            ))}
-          </div>
-        )}
+          {!currentImage ? (
+            <div className="w-full max-w-2xl animate-in fade-in zoom-in duration-500 slide-in-from-bottom-4">
+              <Dropzone onUpload={handleUpload} isUploading={isUploading} />
+            </div>
+          ) : (
+            <div className="w-full animate-in fade-in duration-500">
+               <TransformationViewer
+                 originalUrl={currentImage.originalUrl}
+                 processedUrl={currentImage.transformations?.[0]?.outputUrl || null}
+                 status={currentImage.status}
+                 isProcessing={isUploading || currentImage.status === 'PROCESSING'}
+                 onDownload={handleDownload}
+               />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
