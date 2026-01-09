@@ -1,13 +1,14 @@
 # Uplane - AI Background Remover
 
-Remove backgrounds from images instantly using AI. Free, fast, and with HD quality downloads.
+Remove backgrounds from images instantly using AI. Free, fast, and high quality.
 
 ## Features
 
 - Instant AI-powered background removal
-- HD quality downloads with no watermark
+- HD quality output with no watermark
 - Gallery to view and manage your images
 - Hold to compare original vs processed
+- Upload from gallery modal
 - Mobile-friendly responsive design
 
 ## Tech Stack
@@ -32,7 +33,7 @@ Remove backgrounds from images instantly using AI. Free, fast, and with HD quali
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/ibrahimshittu/uplane.git
 cd uplane
 ```
 
@@ -72,27 +73,29 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
 
 ```
 src/
-├── app/                    # Pages and API routes
-│   ├── (dashboard)/        # Protected routes
+├── app/
+│   ├── (dashboard)/
 │   │   └── gallery/        # User's image gallery
-│   ├── api/                # API endpoints
-│   │   ├── images/         # Image CRUD
-│   │   └── transformations/# Background removal
+│   ├── api/
+│   │   ├── images/         # Image CRUD endpoints
+│   │   └── transformations/# Background removal endpoint
+│   ├── auth/
+│   │   └── callback/       # Auth callback handler
 │   └── page.tsx            # Landing page
 ├── components/
 │   ├── auth/               # Authentication modal
-│   ├── gallery/            # Gallery components
+│   ├── gallery/            # Gallery image cards
 │   ├── home/               # Landing page sections
-│   ├── layout/             # Shared layout (navbar, footer)
-│   ├── ui/                 # Base UI components
-│   └── upload/             # Upload/transformation viewer
-├── hooks/                  # Custom React hooks
+│   ├── layout/             # Navbar & footer
+│   ├── ui/                 # shadcn/ui components
+│   └── upload/             # Upload modal & viewer
+├── hooks/
 │   ├── use-auth.ts         # Auth state management
+│   ├── use-upload.ts       # Upload flow logic
 │   └── use-toast.ts        # Toast notifications
-└── lib/                    # Utilities and services
-    ├── download.ts         # File download utility
-    ├── integrations/       # External APIs
-    ├── storage/            # File storage
+└── lib/
+    ├── integrations/       # remove.bg API
+    ├── storage/            # Supabase storage
     ├── supabase/           # Supabase clients
     └── prisma.ts           # Database client
 ```
