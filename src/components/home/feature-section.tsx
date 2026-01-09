@@ -20,7 +20,7 @@ export function FeatureSection({ user, onOpenAuth }: FeatureSectionProps) {
     <section className="py-16 sm:py-20 bg-white">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-          <div className="space-y-6 max-w-lg order-2 lg:order-1">
+          <div className="space-y-6 max-w-lg order-2 lg:order-1 text-center lg:text-left mx-auto lg:mx-0">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
               Instant and automatic background remover
             </h2>

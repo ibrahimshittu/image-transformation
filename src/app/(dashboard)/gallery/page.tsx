@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ImageCard } from '@/components/gallery/image-card'
 import { Navbar } from '@/components/layout/navbar'
+import { UploadModal } from '@/components/upload/upload-modal'
 import { Plus, Images, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/use-auth'
@@ -33,6 +33,7 @@ export default function GalleryPage() {
   const [pagination, setPagination] = useState<Pagination | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const { toast } = useToast()
   const { user, signOut } = useAuth()
 
@@ -106,6 +107,11 @@ export default function GalleryPage() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar user={user} onSignOut={handleSignOut} />
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onUploadComplete={() => fetchImages(1)}
+      />
 
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-12">
         <div className="flex items-center justify-between mb-8">
@@ -117,13 +123,14 @@ export default function GalleryPage() {
               </p>
             )}
           </div>
-          <Link href="/">
-            <Button className="rounded-lg bg-black text-white hover:bg-gray-800 px-4 sm:px-6 h-9 sm:h-10 text-sm sm:text-[15px] font-medium gap-2">
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">New Upload</span>
-              <span className="sm:hidden">New</span>
-            </Button>
-          </Link>
+          <Button
+            onClick={() => setIsUploadModalOpen(true)}
+            className="rounded-lg bg-black text-white hover:bg-gray-800 px-4 sm:px-6 h-9 sm:h-10 text-sm sm:text-[15px] font-medium gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">New Upload</span>
+            <span className="sm:hidden">New</span>
+          </Button>
         </div>
 
         {isLoading ? (

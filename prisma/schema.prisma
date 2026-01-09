@@ -1,6 +1,3 @@
-// Image Transformation Service - Prisma Schema
-// Database: PostgreSQL (hosted on Supabase)
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,25 +6,17 @@ datasource db {
   provider = "postgresql"
 }
 
-// ============================================
-// User Model - Managed by Supabase Auth
-// ============================================
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   name      String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relationships
-  images Image[]
+  images    Image[]
 
   @@map("users")
 }
 
-// ============================================
-// Image Model - Original uploaded images
-// ============================================
 enum ImageStatus {
   PENDING
   PROCESSING
@@ -41,26 +30,20 @@ model Image {
   originalUrl      String      @map("original_url")
   originalFilename String      @map("original_filename")
   mimeType         String      @map("mime_type")
-  fileSize         Int         @map("file_size") // Size in bytes
+  fileSize         Int         @map("file_size")
   width            Int?
   height           Int?
   status           ImageStatus @default(PENDING)
   createdAt        DateTime    @default(now()) @map("created_at")
   updatedAt        DateTime    @updatedAt @map("updated_at")
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transformations  Transformation[]
 
-  // Relationships
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transformations Transformation[]
-
-  // Indexes
   @@index([userId, createdAt(sort: Desc)])
   @@index([status])
   @@map("images")
 }
 
-// ============================================
-// Transformation Model - Processing operations
-// ============================================
 enum TransformationType {
   REMOVE_BACKGROUND
   FLIP_HORIZONTAL
@@ -75,21 +58,18 @@ enum TransformationStatus {
 }
 
 model Transformation {
-  id              String                @id @default(uuid())
-  imageId         String                @map("image_id")
-  type            TransformationType
-  status          TransformationStatus  @default(PENDING)
-  outputUrl       String?               @map("output_url")
-  errorMessage    String?               @map("error_message")
-  processingTime  Int?                  @map("processing_time") // Time in milliseconds
-  apiCost         Float?                @map("api_cost") // Cost in credits for remove.bg
-  createdAt       DateTime              @default(now()) @map("created_at")
-  updatedAt       DateTime              @updatedAt @map("updated_at")
+  id             String               @id @default(uuid())
+  imageId        String               @map("image_id")
+  type           TransformationType
+  status         TransformationStatus @default(PENDING)
+  outputUrl      String?              @map("output_url")
+  errorMessage   String?              @map("error_message")
+  processingTime Int?                 @map("processing_time")
+  apiCost        Float?               @map("api_cost")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+  image          Image                @relation(fields: [imageId], references: [id], onDelete: Cascade)
 
-  // Relationships
-  image        Image     @relation(fields: [imageId], references: [id], onDelete: Cascade)
-
-  // Indexes
   @@index([imageId])
   @@index([status])
   @@map("transformations")
