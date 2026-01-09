@@ -1,14 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, Eye, RotateCcw } from 'lucide-react'
+import { ExternalLink, Eye, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface TransformationViewerProps {
   originalUrl: string
   processedUrl: string | null
   isProcessing: boolean
-  onDownload: () => void
   onReset?: () => void
 }
 
@@ -16,25 +15,27 @@ export function TransformationViewer({
   originalUrl,
   processedUrl,
   isProcessing,
-  onDownload,
   onReset,
 }: TransformationViewerProps) {
   const [showOriginal, setShowOriginal] = useState(false)
 
   const isCompleted = !!processedUrl
 
+  const handleOpenImage = () => {
+    if (processedUrl) {
+      window.open(processedUrl, '_blank')
+    }
+  }
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden w-full">
-      {/* Header with controls */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/50">
         <div className="flex items-center gap-3">
-          {/* Spinner when processing */}
           {isProcessing && (
             <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
           )}
         </div>
 
-        {/* Action buttons */}
         <div className="flex items-center gap-2">
           {onReset && (
             <Button variant="outline" size="sm" onClick={onReset} className="gap-2">
@@ -43,9 +44,9 @@ export function TransformationViewer({
             </Button>
           )}
           {isCompleted && (
-            <Button size="sm" onClick={onDownload} className="bg-black hover:bg-gray-800 text-white gap-2">
-              <Download className="w-4 h-4" />
-              Download
+            <Button size="sm" onClick={handleOpenImage} className="bg-black hover:bg-gray-800 text-white gap-2">
+              <ExternalLink className="w-4 h-4" />
+              Open
             </Button>
           )}
         </div>

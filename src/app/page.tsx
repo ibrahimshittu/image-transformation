@@ -14,7 +14,7 @@ import { useUpload } from '@/hooks/use-upload'
 function HomeContent() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const { user, signOut } = useAuth()
-  const { currentImage, isUploading, handleUpload, handleDownload, handleReset } = useUpload()
+  const { currentImage, isUploading, handleUpload, handleReset } = useUpload()
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -54,7 +54,6 @@ function HomeContent() {
         isUploading={isUploading}
         onUpload={onUpload}
         onReset={handleReset}
-        onDownload={handleDownload}
         onOpenAuth={() => setIsAuthModalOpen(true)}
       />
       <HowItWorks />

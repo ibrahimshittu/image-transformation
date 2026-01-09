@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, Download, Loader2, X, Expand } from 'lucide-react'
+import { Trash2, ExternalLink, Loader2, X, Expand } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { downloadImage } from '@/lib/download'
 
 interface ImageCardProps {
   id: string
@@ -38,16 +37,9 @@ export function ImageCard({
     }
   }
 
-  const handleDownload = async () => {
+  const handleOpenImage = () => {
     const url = processedUrl || originalUrl
-    const filename = processedUrl
-      ? `processed_${originalFilename.replace(/\.[^/.]+$/, '')}.png`
-      : originalFilename
-    try {
-      await downloadImage(url, filename)
-    } catch (error) {
-      console.error('Download failed:', error)
-    }
+    window.open(url, '_blank')
   }
 
   const displayUrl = processedUrl || originalUrl
@@ -60,7 +52,6 @@ export function ImageCard({
   return (
     <>
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
-        {/* Image Preview */}
         <div
           className="aspect-square relative bg-[url('/grid-pattern.svg')] bg-repeat cursor-pointer"
           onClick={() => setShowModal(true)}
@@ -71,7 +62,6 @@ export function ImageCard({
             className="w-full h-full object-contain"
           />
 
-          {/* Overlay Actions */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
             <Button
               size="sm"
@@ -91,10 +81,10 @@ export function ImageCard({
                 className="bg-white hover:bg-gray-100"
                 onClick={(e) => {
                   e.stopPropagation()
-                  handleDownload()
+                  handleOpenImage()
                 }}
               >
-                <Download className="w-4 h-4" />
+                <ExternalLink className="w-4 h-4" />
               </Button>
             )}
             <Button
@@ -110,7 +100,6 @@ export function ImageCard({
             </Button>
           </div>
 
-          {/* Delete Confirmation Overlay */}
           {showConfirm && (
             <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-3 p-4">
               <p className="text-white text-sm text-center font-medium">Delete this image?</p>
@@ -146,7 +135,6 @@ export function ImageCard({
           )}
         </div>
 
-        {/* Card Footer */}
         <div className="p-3 border-t border-gray-100">
           <p className="text-sm font-medium text-gray-900 truncate" title={originalFilename}>
             {originalFilename}
@@ -155,21 +143,17 @@ export function ImageCard({
         </div>
       </div>
 
-      {/* View Modal */}
       {showModal && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           onClick={() => setShowModal(false)}
         >
-          {/* Backdrop */}
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
 
-          {/* Modal Content */}
           <div
             className="relative max-w-4xl w-full max-h-[90vh] bg-white rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-gray-900 truncate">{originalFilename}</p>
@@ -179,11 +163,11 @@ export function ImageCard({
                 {status === 'COMPLETED' && (
                   <Button
                     size="sm"
-                    onClick={handleDownload}
+                    onClick={handleOpenImage}
                     className="bg-black hover:bg-gray-800 text-white gap-2"
                   >
-                    <Download className="w-4 h-4" />
-                    Download
+                    <ExternalLink className="w-4 h-4" />
+                    Open
                   </Button>
                 )}
                 <Button
@@ -197,7 +181,6 @@ export function ImageCard({
               </div>
             </div>
 
-            {/* Image */}
             <div className="bg-[url('/grid-pattern.svg')] bg-repeat p-4">
               <img
                 src={displayUrl}

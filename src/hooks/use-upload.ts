@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { downloadImage } from '@/lib/download'
 
 interface Image {
   id: string
@@ -79,23 +78,6 @@ export function useUpload(onUploadComplete?: () => void) {
     }
   }
 
-  const handleDownload = async () => {
-    const url = currentImage?.transformations?.[0]?.outputUrl
-    if (url && currentImage) {
-      try {
-        const filename = `processed_${currentImage.originalFilename.replace(/\.[^/.]+$/, '')}.png`
-        await downloadImage(url, filename)
-      } catch (error) {
-        console.error('Download failed:', error)
-        toast({
-          variant: 'destructive',
-          title: 'Download failed',
-          description: 'Could not download the image. Please try again.',
-        })
-      }
-    }
-  }
-
   const handleReset = () => {
     setCurrentImage(null)
   }
@@ -104,7 +86,6 @@ export function useUpload(onUploadComplete?: () => void) {
     currentImage,
     isUploading,
     handleUpload,
-    handleDownload,
     handleReset,
   }
 }

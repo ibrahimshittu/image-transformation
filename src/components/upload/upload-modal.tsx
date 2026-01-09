@@ -13,7 +13,7 @@ interface UploadModalProps {
 }
 
 export function UploadModal({ isOpen, onClose, onUploadComplete }: UploadModalProps) {
-  const { currentImage, isUploading, handleUpload, handleDownload, handleReset } = useUpload(onUploadComplete)
+  const { currentImage, isUploading, handleUpload, handleReset } = useUpload(onUploadComplete)
 
   const handleClose = () => {
     handleReset()
@@ -102,7 +102,6 @@ export function UploadModal({ isOpen, onClose, onUploadComplete }: UploadModalPr
               originalUrl={currentImage?.originalUrl || ''}
               processedUrl={currentImage?.transformations?.[0]?.outputUrl || null}
               isProcessing={isUploading || currentImage?.status === 'PROCESSING'}
-              onDownload={handleDownload}
               onReset={handleReset}
             />
           )}

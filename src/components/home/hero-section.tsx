@@ -24,7 +24,6 @@ interface HeroSectionProps {
   isUploading: boolean
   onUpload: (file: File) => void
   onReset: () => void
-  onDownload: () => void
   onOpenAuth: () => void
 }
 
@@ -34,7 +33,6 @@ export function HeroSection({
   isUploading,
   onUpload,
   onReset,
-  onDownload,
   onOpenAuth,
 }: HeroSectionProps) {
   const onDrop = useCallback(
@@ -138,7 +136,6 @@ export function HeroSection({
               originalUrl={currentImage?.originalUrl || ''}
               processedUrl={currentImage?.transformations?.[0]?.outputUrl || null}
               isProcessing={isUploading || currentImage?.status === 'PROCESSING'}
-              onDownload={onDownload}
               onReset={onReset}
             />
           )}
